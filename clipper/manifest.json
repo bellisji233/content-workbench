@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "小红书采集 · 内容工作台",
+  "version": "0.4.0",
+  "description": "在小红书笔记页或账号主页一键采集，落进本地收件箱，供爆款拆解和对标分析使用。",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "downloads",
+    "storage",
+    "alarms",
+    "notifications",
+    "idle"
+  ],
+  "host_permissions": [
+    "https://www.xiaohongshu.com/*",
+    "https://xiaohongshu.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "采集当前页面",
+    "default_icon": {
+      "16": "icons/16.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  }
+}

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>依次更新对标账号</title>
+<style>
+:root{
+  --accent:#E8467F; --accent-soft:#FDECF3;
+  --ink:#2B2536; --ink-2:#6B6280; --ink-3:#9A93AC;
+  --surface:#FFF; --surface-2:#F7F4FA; --line:#EDE7F3;
+  --ok:#22A585; --warn:#DE8A18;
+  --sans:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);font-size:14px;color:var(--ink);line-height:1.6;min-height:100vh;
+  background:linear-gradient(150deg,#FDE0C8 0%,#F9CBDD 50%,#DCC6F5 100%);padding:40px 16px}
+.card{max-width:640px;margin:0 auto;background:var(--surface);border-radius:20px;padding:28px 30px;
+  box-shadow:0 2px 4px rgba(80,50,110,.05),0 14px 30px -16px rgba(80,50,110,.3)}
+h1{font-size:20px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.tag{font-size:11px;font-weight:600;color:var(--warn);background:#FDF2E0;padding:2px 9px;border-radius:12px}
+.sub{color:var(--ink-2);margin:0 0 20px}
+h2{font-size:13px;color:var(--ink-3);font-weight:600;margin:22px 0 8px;letter-spacing:.04em}
+.list{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.acc{display:flex;justify-content:space-between;gap:12px;padding:9px 14px;font-size:13px}
+.acc+.acc{border-top:1px solid var(--line)}
+.acc span{color:var(--ink-3);font-family:var(--mono);font-size:11.5px;white-space:nowrap}
+.empty{color:var(--ink-2);font-size:13px;padding:14px;background:var(--surface-2);border-radius:12px}
+.risk{background:#FDF2E0;border-radius:12px;padding:14px 18px;font-size:13px;color:#7A4E0E}
+.risk ul{margin:6px 0 0;padding-left:18px}
+.risk li{margin-bottom:4px}
+label{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13px;cursor:pointer}
+.limits{font-size:12.5px;color:var(--ink-2)}
+.bar{display:flex;gap:10px;align-items:center;margin-top:20px;flex-wrap:wrap}
+button{font:inherit;border:none;border-radius:20px;padding:10px 22px;cursor:pointer;font-weight:600}
+button.go{background:var(--accent);color:#fff}
+button.stop{background:var(--surface-2);color:var(--ink)}
+button:disabled{opacity:.45;cursor:default}
+.state{font-size:12.5px;color:var(--ink-2)}
+.log{margin-top:16px;font-family:var(--mono);font-size:12px;background:var(--surface-2);border-radius:12px;
+  padding:12px 14px;white-space:pre-wrap;max-height:260px;overflow:auto;display:none}
+.log.on{display:block}
+.acc.skip{color:var(--ink-3)}
+.paused{display:none;margin-bottom:16px;background:#FDECEC;color:#A33A3A;border-radius:12px;padding:10px 14px;font-size:13px}
+.paused.on{display:block}
+.limits ul{margin:0;padding-left:18px}
+.limits li{margin-bottom:3px}
+.modes{display:flex;gap:18px;flex-wrap:wrap}
+.modes label{margin-top:0}
+.when{display:none;margin-top:12px;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap}
+.when.on{display:flex}
+select{font:inherit;font-size:13px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.next{font-size:12.5px;color:var(--ink-2);margin-top:10px}
+.auto-risk{display:none;margin-top:12px}
+.auto-risk.on{display:block}
+</style></head>
+<body>
+  <div class="card">
+    <h1>依次更新对标账号 <span class="tag">实验功能</span></h1>
+    <p class="sub">在当前浏览器里依次打开采集过的账号主页，读取最新笔记。</p>
+    <div class="paused" id="paused"></div>
+
+    <h2>账号</h2>
+    <div id="accounts"></div>
+
+    <h2>风险</h2>
+    <div class="risk">
+      这是自动化访问，和手动点「抓取这个主页」不同：
+      <ul>
+        <li>浏览器会自动打开主页并读取数据，小红书可能据此判定账号行为异常，最坏情况是账号受限</li>
+        <li>已有账号在使用自动化工具访问后收到过「行为异常」警告</li>
+        <li>可能违反小红书用户协议</li>
+        <li>下方的运行方式能降低被识别的可能，但不能消除</li>
+      </ul>
+      <label><input type="checkbox" id="consent"> 我了解以上风险，仍要使用</label>
+    </div>
+
+    <h2>运行方式</h2>
+    <div class="limits"><ul>
+      <li>每次最多 10 个账号，5 天内采集过的跳过，顺序每次随机</li>
+      <li>只读取打开主页时加载的最新笔记，不滚动；不点赞、不关注、不评论</li>
+      <li>每个主页停留 6–30 秒，账号之间间隔 20 秒至 4 分钟，时长随机</li>
+      <li>两次至少间隔 7 天，仅在 9:00–23:00 运行</li>
+      <li>出现验证页或安全提示时立即停止，14 天内不再运行</li>
+    </ul></div>
+
+    <div class="bar">
+      <button class="go" id="start">开始更新</button>
+      <button class="stop" id="stop" disabled>停止</button>
+      <span class="state" id="state"></span>
+    </div>
+    <div class="log" id="log"></div>
+
+    <h2>定期更新</h2>
+    <div class="modes">
+      <label><input type="radio" name="mode" id="mode-off"> 关闭</label>
+      <label><input type="radio" name="mode" id="mode-remind"> 到时提醒</label>
+      <label><input type="radio" name="mode" id="mode-auto"> 到时自动运行</label>
+    </div>
+    <div class="when" id="when">每周
+      <select id="weekday">
+        <option value="1">周一</option><option value="2">周二</option><option value="3">周三</option>
+        <option value="4">周四</option><option value="5">周五</option><option value="6">周六</option>
+        <option value="0">周日</option>
+      </select>
+      <select id="period">
+        <option value="morning">上午 9–12 点</option>
+        <option value="afternoon">下午 1–6 点</option>
+        <option value="evening">晚上 7–10 点</option>
+      </select>
+      <span class="limits">时段内随机时间</span>
+    </div>
+    <div class="risk auto-risk" id="auto-risk">
+      自动运行时可能无人在场：
+      <ul>
+        <li>出现验证页时插件会停止，但无法完成验证，需要之后手动处理</li>
+        <li>只在电脑 5 分钟内有操作时运行；Chrome 关闭或电脑休眠时顺延</li>
+        <li>开始前有 15 秒倒数，期间可取消；运行中随时可以停止</li>
+      </ul>
+      <label><input type="checkbox" id="auto-consent"> 我了解以上风险，允许自动运行</label>
+    </div>
+    <div class="next" id="next"></div>
+  </div>
+  <script src="shared.js"></script>
+  <script src="batch.js"></script>
+</body></html>

@@ -1,0 +1,5 @@
+openpyxl>=3.1
+
+# 视频笔记转写（可选，另需 ffmpeg）
+# faster-whisper
+# opencc-python-reimplemented

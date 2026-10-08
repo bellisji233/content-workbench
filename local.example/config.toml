@@ -1,0 +1,122 @@
+# 内容工作台配置。复制整个 local.example/ 为 local/ 后按自己的情况改。
+# 相对路径以本文件所在的 local/ 为起点；~ 会展开成用户目录。
+# 没有的部分整段删掉即可，工作台会跳过对应的视图。
+
+[paths]
+# 平台后台导出的 xlsx 放在哪（下面每个平台一个子目录）
+exports = "~/Documents/工作台数据/exports"
+# Markdown 稿件文件夹（Obsidian、Typora 等都行），每篇一个 .md
+drafts = "~/Documents/稿件"
+# 采集插件、页面导出写入的下载目录
+download_inbox = "~/Downloads/xhs-inbox"
+download_analyses = "~/Downloads/xhs-analyses"
+
+[workbench]
+# 线上工作台地址（可选）。用 Claude Code 发布到 claude.ai 后填在这里，以后都更新这一个
+url = ""
+
+[analysis]
+# 本地工作台点「分析」时由谁来做：
+#   claude   本机 Claude Code（默认），model 留空用它的默认模型
+#   command  任意命令行：从标准输入读提示词，把结果写到标准输出（例如其他 agent 的非交互模式）
+engine = "claude"
+model = ""
+command = ""
+
+# ---------------------------------------------------------------- 账号
+# 选题推荐会把这段交给模型，作为「这个账号是谁」的背景
+[account]
+name = ""
+positioning = ""       # 账号做什么内容，例如「AI 相关内容，题材不限定细分行业」
+bio = ""               # 作者背景，选题推荐只用来找视角，不当作选题范围
+
+# ---------------------------------------------------------------- 状态
+# 默认状态之外再加的选项：[名称, 颜色]，颜色取 amber / green / grey / blue / red
+[status]
+extra = []
+
+# ---------------------------------------------------------------- 平台数据
+# 每个平台一段。dir 是 paths.exports 下的子目录，放创作者后台导出的 xlsx（可再分日期子目录）。
+# 自动取修改时间最新、且表头含 columns.title 的那份。columns 写表头上的列名，没有的列不写。
+# 下面是小红书、抖音创作者后台「笔记/作品数据」导出的列名。
+[[platforms]]
+name = "小红书"
+dir = "redbook"
+[platforms.columns]
+title = "笔记标题"
+date = "首次发布时间"
+form = "体裁"
+impressions = "曝光"
+views = "观看量"
+ctr = "封面点击率"
+likes = "点赞"
+comments = "评论"
+collects = "收藏"
+fans = "涨粉"
+shares = "分享"
+
+[[platforms]]
+name = "抖音"
+dir = "douyin"
+[platforms.columns]
+title = "作品名称"
+date = "发布时间"
+form = "体裁"
+impressions = "播放量"
+views = "播放量"
+finish5s = "5s完播率"
+bounce2s = "2s跳出率"
+likes = "点赞量"
+shares = "分享量"
+comments = "评论量"
+collects = "收藏量"
+fans = "粉丝增量"
+
+# ---------------------------------------------------------------- 生产流水线（可选）
+# 每期一个文件夹，文件夹名最好形如 2026-07-09-slug（日期 + 标题）。path 是放这些文件夹的上一级。
+# 每个阶段写「哪些文件出现就算完成」，支持通配符；published = true 的阶段按有没有发布记录判断。
+# 不用流水线就保持注释，阶段只剩「文稿 → 发布」。不知道怎么写时让 agent 运行 onboard.py scan 起草。
+# [pipeline]
+# path = "~/Documents/我的内容项目/works"
+# junk = []
+#
+# [[pipeline.stages]]
+# key = "稿"
+# label = "文稿"
+# files = ["draft.md"]
+#
+# [[pipeline.stages]]
+# key = "剪"
+# label = "剪辑"
+# files = ["*.mp4"]
+#
+# [[pipeline.stages]]
+# key = "发"
+# label = "发布"
+# published = true
+
+# ---------------------------------------------------------------- 稿件文件夹
+# 稿件文件夹里的稿子算作已完成哪些阶段（阶段 key 来自 [pipeline]；没配流水线就写 "稿"）
+[drafts]
+done = ["稿"]
+
+# ---------------------------------------------------------------- 对标账号
+[benchmark]
+recent_days = 30       # 「近期爆款」统计最近多少天，更早的归入「更早的高表现」
+
+# ---------------------------------------------------------------- 选题报告
+[report]
+strong_fan = 3.0       # 每千次播放涨粉高于此值，判为主力方向
+weak_fan = 1.0         # 低于此值，判为有量无转化或降权
+min_samples = 3        # 少于这么多条只列不判
+
+# ---------------------------------------------------------------- 选题分类
+# 按顺序匹配标题，第一个命中即归类，都不命中归「其他」。keywords 是关键词列表；需要正则时用 pattern。
+# 不知道怎么分时，让 agent 运行 onboard.py titles 读一遍你的标题，帮你起草。
+[[categories]]
+name = "教程"
+keywords = ["教程", "上手", "手把手", "怎么用"]
+
+[[categories]]
+name = "测评"
+keywords = ["测评", "对比", "横评", "实测"]

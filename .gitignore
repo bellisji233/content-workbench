@@ -1,0 +1,6 @@
+# 你自己的配置与数据
+local/
+# 生成的示例数据
+examples/demo/
+__pycache__/
+.DS_Store
