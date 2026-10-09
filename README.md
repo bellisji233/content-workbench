@@ -57,7 +57,7 @@ python3 scripts/serve.py --demo
 
    ```
    # Claude Code，个人级（所有项目可用）
-   git clone <仓库地址> ~/.claude/skills/content-workbench
+   git clone https://github.com/bellisji233/content-workbench.git ~/.claude/skills/content-workbench
    # 或项目级：放到项目的 .claude/skills/content-workbench
    ```
 
