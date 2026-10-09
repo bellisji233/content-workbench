@@ -111,26 +111,18 @@ published = true
 done = ["选", "稿"]
 
 [report]
-strong_fan = 3.0
-weak_fan = 1.0
+strong_ratio = 1.0
+weak_ratio = 0.4
 min_samples = 3
-
-[[categories]]
-name = "工具教程"
-keywords = ["教程", "上手", "手把手", "保姆级"]
-
-[[categories]]
-name = "工作流分享"
-keywords = ["工作流", "自动化", "搭了", "系统"]
-
-[[categories]]
-name = "产品测评"
-keywords = ["测评", "对比", "实测", "横评"]
-
-[[categories]]
-name = "观点随笔"
-keywords = ["聊聊", "思考", "为什么"]
 '''
+
+# 示例的选题方向：真实使用时由 AI 按作品标题划分，这里直接给出划分结果，打开示例不调用 AI
+TOPICS = [
+    ("工具教程", "一步步教会某个 AI 工具或功能的上手用法", ["保姆级", "手把手", "新手上手"]),
+    ("工作流分享", "自己搭的自动化流程和做成的小工具", ["工作流", "自动化", "记账"]),
+    ("产品测评", "多款 AI 产品的实测、对比与横评", ["实测", "横评", "测评"]),
+    ("观点随笔", "对 AI 工具和行业的个人看法", ["聊聊", "思考"]),
+]
 
 # (标题, 体裁, 播放量级, 涨粉率‰, 收藏率%)
 POSTS = [
@@ -305,6 +297,16 @@ VAULT = """# 爆款库
 """
 
 
+def write_topics():
+    import classify
+    cats = [{"name": n, "desc": d} for n, d, _ in TOPICS]
+    assign = {}
+    for title, *_ in POSTS:
+        cat = next((n for n, _, kws in TOPICS if any(k in title for k in kws)), "观点随笔")
+        assign[classify.key_of(title)] = {"title": title, "cat": cat, "by": "ai"}
+    classify.save({"categories": cats, "assign": assign})
+
+
 def write_vault():
     d = LOCAL / "data"
     d.mkdir(parents=True, exist_ok=True)
@@ -327,6 +329,7 @@ def main():
     write_inbox()
     write_benchmark()
     write_vault()
+    write_topics()
     print(f"✓ 示例数据：{DEMO}")
     print("  打开：python3 scripts/serve.py --demo")
 

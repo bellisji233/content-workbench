@@ -17,16 +17,20 @@ from paths import BENCHMARK, CONFIG
 RECENT_DAYS = int(CONFIG.get("benchmark", {}).get("recent_days", 30))
 
 
-# 标题模式：用来看这批账号在标题层用什么套路、哪种真的有效
+# 标题模式：用来看这批账号在标题层用什么套路、哪种真的有效。
+# 只认句式，不认题材，任何赛道通用；要加自己赛道的模式，写在 local/config.toml 的 [[benchmark.patterns]]
 TITLE_PATTERNS = [
-    ("教程/上手", r"教程|上手|从\s*0|入门|保姆|手把手|实测|讲清楚|搞懂|必读|怎么用"),
+    ("教程/上手", r"教程|上手|从\s*0|入门|保姆|手把手|讲清楚|搞懂|必读|怎么用"),
     ("数字承诺", r"^\d+|[一二三四五六七八九十\d]+\s*(个|句|步|种|条|款|分钟|天)"),
     ("疑问句", r"[?？]|什么是|怎么|如何|为什么|哪些"),
     ("情绪/感叹", r"[!！]|绝|太|超|真的|居然|终于|惊艳|好可爱|夯"),
-    ("工具/skill", r"skill|agent|prompt|工作流|自动化|搭建|做了个|手搓|工具"),
+    ("对比/测评", r"对比|测评|横评|实测|\bvs\b|PK|区别|哪个好|怎么选"),
+    ("清单/合集", r"合集|清单|盘点|推荐|必备|大全|汇总|分享\s*\d"),
+    ("亲历/复盘", r"做了个|做了一个|手搓|亲测|实录|复盘|踩坑|经验|我用"),
     ("系列化编号", r"[（(]\d+[/／]\d+[)）]|[（(]\s*\d+\s*[)）]|第\s*\d+\s*[期讲]"),
     ("身份视角", r"文科|小白|零基础|下班|普通人|新手|前\s*\S{1,4}(狗|人)|\d+岁"),
-]
+] + [(x["name"], x["pattern"]) for x in CONFIG.get("benchmark", {}).get("patterns", [])
+     if x.get("name") and x.get("pattern")]
 
 
 def tag_title(t):
@@ -138,16 +142,22 @@ def save_account(user_id, r, fetched=None):
                    ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def write_summary(new_count):
+def write_summary(new_count, record=True):
     """重算全部对标账号的汇总供工作台读取，并记一条运行历史。
 
     插件是一个账号一个账号收进来的，同一天会写好几次，
-    所以同一天的新增数累加，不覆盖。
+    所以同一天的新增数累加，不覆盖。删除账号、改了统计口径时只重算，不记历史（record=False）。
     """
     data = [json.loads(f.read_text(encoding="utf-8")) for f in BENCHMARK.glob("*.json")
             if not f.name.startswith("_")]
     summary = analyze(data)
     summary["fetchedAt"] = date.today().isoformat()
+    if not record:                      # 只是重算，采集日期沿用上一次
+        try:
+            old = json.loads((BENCHMARK / "_summary.json").read_text(encoding="utf-8"))
+            summary["fetchedAt"] = old.get("fetchedAt") or summary["fetchedAt"]
+        except (OSError, json.JSONDecodeError):
+            pass
     summary["accounts"] = [{"nickname": a["nickname"], "userId": a["userId"],
                             "fans": a.get("fans", ""), "desc": a.get("desc", ""),
                             "url": f"https://www.xiaohongshu.com/user/profile/{a['userId']}",
@@ -158,6 +168,8 @@ def write_summary(new_count):
                            for a in data]
     (BENCHMARK / "_summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    if not record:
+        return summary
 
     hist_f = BENCHMARK / "_history.json"
     hist = []

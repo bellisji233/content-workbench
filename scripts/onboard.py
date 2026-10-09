@@ -3,8 +3,8 @@
 
 用法（在工作台目录下运行）:
   python3 scripts/onboard.py init      没有 local/ 时，从 local.example/ 复制一份
-  python3 scripts/onboard.py check     逐项检查配置：路径、平台导出、稿件、流水线、分类
-  python3 scripts/onboard.py titles    列出全部发布标题和当前归类，供起草选题分类
+  python3 scripts/onboard.py check     逐项检查配置：路径、平台导出、稿件、流水线、选题方向
+  python3 scripts/onboard.py titles    列出全部发布标题和当前归类
   python3 scripts/onboard.py scan 目录  扫一遍生产流水线文件夹，列出每期常见的文件，供起草 [pipeline]
 """
 
@@ -87,9 +87,16 @@ def check():
     else:
         print("  · 还没有平台数据，放入导出表格后再检查")
 
-    print("选题分类")
-    from classify import RULES
-    line(bool(RULES), f"{len(RULES)} 类" if RULES else "还没有分类，全部会归入「其他」（运行 titles 起草）")
+    print("选题方向")
+    import classify
+    cats = classify.categories()
+    if cats:
+        line(True, f"{len(cats)} 个方向：" + "、".join(c["name"] for c in cats))
+        left = classify.pending(classify.all_items()) if pubs else []
+        if left:
+            print(f"  · {len(left)} 条作品尚未归类：python3 scripts/classify.py")
+    else:
+        line(False, "还没有划分：python3 scripts/classify.py（AI 读全部作品标题划分方向）")
 
     print("其他")
     print(f"  · 账号：{paths.CONFIG.get('account', {}).get('name') or '未填写（选题推荐会缺少账号背景）'}")

@@ -26,8 +26,6 @@ import json
 import re
 import secrets
 import select
-import shlex
-import shutil
 import socket
 import subprocess
 import sys
@@ -46,10 +44,12 @@ if "--demo" in sys.argv:
     os.environ["WORKBENCH_LOCAL"] = str(_demo)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import agent  # noqa: E402
 import build_workbench as bw  # noqa: E402
+import classify  # noqa: E402
 import merge_assets  # noqa: E402
 import topic_report  # noqa: E402
-from paths import (AGENT_CWD, ANALYSIS, ANALYSIS_MODEL, EXPORTS, INBOX, LOCAL, STATE,  # noqa: E402
+from paths import (AGENT_CWD, EXPORTS, INBOX, LOCAL, STATE,  # noqa: E402
                    TOPIC_REPORTS)
 
 
@@ -68,7 +68,6 @@ def load_token():
 TOKEN = load_token()
 COLLECTIONS = {"status", "analyses"}
 DOC_ID = re.compile(r"^[\w.-]{1,160}$")
-SYSTEM_PROMPT = "直接输出用户要求的内容，使用 Markdown。不要开场白，不要结束语。"
 
 
 def now_iso():
@@ -140,19 +139,81 @@ def transcribe_once():
 bw.auto_transcribe = transcribe_once
 
 
-def refresh_topic_report():
-    """平台导出比最新一份选题报告新，就重算今天的报告。"""
-    xs = [p for p in EXPORTS.rglob("*.xlsx") if not p.name.startswith("~$")] \
+# 选题方向的后台任务：归类新作品或重新划分，要调 agent，几十秒到几分钟，不能挡着页面
+_job = {"status": "idle", "error": "", "kind": "", "tried": None}
+_job_lock = threading.Lock()
+
+
+def start_classify(kind="ensure", hint=""):
+    """后台归类（ensure）或重新划分（partition），完成后重算今天的报告。同一时间只跑一个。"""
+    with _job_lock:
+        if _job["status"] == "running":
+            return False
+        _job.update(status="running", error="", kind=kind)
+
+    def work():
+        try:
+            items = classify.all_items()
+            if kind == "partition":
+                classify.partition(items, hint, log=lambda *_: None)
+            else:
+                classify.ensure(items, log=lambda *_: None)
+            regenerate_topic_report()
+            _mark_exports_seen()
+            _job.update(status="idle")
+        except Exception as e:                  # 失败原因显示在页面上，可以手动重试
+            _job.update(status="error", error=str(e)[:200])
+
+    threading.Thread(target=work, daemon=True).start()
+    return True
+
+
+def _exports():
+    return [p for p in EXPORTS.rglob("*.xlsx") if not p.name.startswith("~$")] \
         if EXPORTS.exists() else []
+
+
+def _mark_exports_seen():
+    xs = _exports()
+    if xs:
+        TOPIC_REPORTS.mkdir(parents=True, exist_ok=True)
+        (TOPIC_REPORTS / ".last-export").write_text(str(max(p.stat().st_mtime for p in xs)))
+
+
+def refresh_topic_report():
+    """放进了新的平台导出，就重算今天的报告。
+
+    「新」按上次自动重算时见过的最新导出时间判断，不按报告文件的时间：
+    页面上删掉一份报告后，不会因为报告变旧了又自动生成回来。
+    有作品还没归入选题方向时，先在后台归类，归完再出报告；
+    同一批作品归类失败不自动重试，页面上可以手动再试。
+    """
+    xs = _exports()
     if not xs:
         return
-    newest_export = max(p.stat().st_mtime for p in xs)
-    reports = list(TOPIC_REPORTS.glob("*-自有内容.md")) if TOPIC_REPORTS.exists() else []
-    if reports and max(p.stat().st_mtime for p in reports) >= newest_export:
+    if _job["status"] == "running":
         return
-    TOPIC_REPORTS.mkdir(parents=True, exist_ok=True)
-    out = TOPIC_REPORTS / f"{topic_report.TODAY}-自有内容.md"
-    out.write_text(topic_report.build_report(), encoding="utf-8")
+    items = classify.all_items()
+    if classify.needs_work(items) and agent.available():
+        batch = tuple(sorted(i["key"] for i in classify.pending(items)))
+        if _job["tried"] != batch:
+            _job["tried"] = batch
+            start_classify()
+            return
+    newest_export = max(p.stat().st_mtime for p in xs)
+    seen_f = TOPIC_REPORTS / ".last-export"
+    try:
+        seen = float(seen_f.read_text())
+    except (OSError, ValueError):
+        reports = list(TOPIC_REPORTS.glob("*-自有内容.md")) if TOPIC_REPORTS.exists() else []
+        seen = max((p.stat().st_mtime for p in reports), default=0)
+    if seen < newest_export:
+        TOPIC_REPORTS.mkdir(parents=True, exist_ok=True)
+        out = TOPIC_REPORTS / f"{topic_report.TODAY}-自有内容.md"
+        out.write_text(topic_report.build_report(), encoding="utf-8")
+    if not seen_f.exists() or seen < newest_export:
+        TOPIC_REPORTS.mkdir(parents=True, exist_ok=True)
+        seen_f.write_text(str(max(seen, newest_export)))
 
 
 def regenerate_topic_report():
@@ -189,31 +250,14 @@ def snapshot():
         except Exception as e:              # 报告失败不该挡住页面
             print(f"选题报告重算失败：{e}", file=sys.stderr)
         payload = bw.to_payload(*bw.build())
+    payload["topicsJob"] = {k: _job[k] for k in ("status", "error", "kind")}
+    payload["topicsAgent"] = agent.available()
     stable = {k: v for k, v in payload.items() if k != "generated"}
     payload["version"] = hashlib.sha1(
         json.dumps(stable, ensure_ascii=False, sort_keys=True, default=str).encode()
     ).hexdigest()[:12]
     payload["localApi"] = {"token": TOKEN}
     return payload
-
-
-# ---------------------------------------------------------------- 分析
-
-def analysis_cmd():
-    """返回 (命令, 输出格式)。claude 输出 stream-json，自定义命令输出纯文本。"""
-    if ANALYSIS.get("engine") == "command" and ANALYSIS.get("command"):
-        return shlex.split(ANALYSIS["command"]), "text"
-    return claude_cmd(), "claude"
-
-
-def claude_cmd():
-    exe = shutil.which("claude") or str(Path.home() / ".local" / "bin" / "claude")
-    cmd = [exe, "-p", "--output-format", "stream-json", "--verbose",
-           "--include-partial-messages", "--tools", "", "--no-session-persistence",
-           "--strict-mcp-config", "--system-prompt", SYSTEM_PROMPT]
-    if ANALYSIS_MODEL:
-        cmd += ["--model", ANALYSIS_MODEL]
-    return cmd
 
 
 # ---------------------------------------------------------------- HTTP
@@ -321,6 +365,34 @@ class Handler(http.server.BaseHTTPRequestHandler):
             with _lock:
                 done, errors = asset_retro.apply_plan(body)
             return self._json(200, {"done": done, "errors": errors})
+        if path == "/api/topics":                       # 选题方向：改单条、重新划分、归类新作品、撤销
+            act = str(body.get("action") or "")
+            try:
+                if act == "assign":
+                    classify.set_category(str(body.get("title") or ""), str(body.get("cat") or ""))
+                elif act == "undo":
+                    classify.undo()
+                elif act in ("partition", "ensure"):
+                    if not agent.available():
+                        return self._json(500, {"error": agent.missing_message(agent.analysis_cmd(False)[0])})
+                    return self._json(200, {"started": start_classify(act, str(body.get("hint") or ""))})
+                else:
+                    return self._json(400, {"error": "bad action"})
+                regenerate_topic_report()
+                return self._json(200, {"ok": True})
+            except ValueError as e:
+                return self._json(400, {"error": str(e)})
+        if path in ("/api/delete", "/api/restore"):     # 删除进回收站，可撤销
+            import trash
+            try:
+                with _lock:
+                    if path == "/api/restore":
+                        trash.restore(str(body.get("token") or ""))
+                        return self._json(200, {"ok": True})
+                    ids = body.get("ids") or [body.get("id")]
+                    return self._json(200, {"token": trash.delete(str(body.get("kind") or ""), ids)})
+            except (trash.Missing, ValueError) as e:
+                return self._json(404, {"error": str(e)})
         if path == "/api/open":
             folder = bw.source_dir(str(body.get("key") or ""))
             if not folder:
@@ -344,13 +416,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self._json(400, {"error": "empty prompt"})
         AGENT_CWD.mkdir(parents=True, exist_ok=True)
         try:
-            cmd, fmt = analysis_cmd()
+            cmd, fmt = agent.analysis_cmd()
             proc = subprocess.Popen(cmd, cwd=AGENT_CWD, stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except FileNotFoundError:
-            name = Path(cmd[0]).name
-            return self._json(500, {"error": "本机没有找到 Claude Code，无法分析。安装后重试；使用其他 agent 时，让 agent 把分析方式改成它的命令"
-                                    if name == "claude" else f"没有找到分析命令 {name}，无法分析。确认已安装，或让 agent 检查分析方式的配置"})
+            return self._json(500, {"error": agent.missing_message(cmd)})
 
         self.send_response(200)
         self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")

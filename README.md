@@ -73,14 +73,15 @@ python3 scripts/serve.py --demo
 ## 接入
 
 对 agent 说「建工作台」，它会按 `SKILL.md` 带你走一遍：先讲清上面的原理，再逐项配好稿件、平台数据、
-生产流水线（可选）、账号定位和选题分类，最后检查稿件和发布记录关联上了多少。
+生产流水线（可选）、账号定位，再让 AI 读你的作品标题划分选题方向，最后检查稿件和发布记录关联上了多少。
 
 手动接入：
 
 ```
 python3 scripts/onboard.py init      # 从 local.example/ 建出 local/
 # 编辑 local/config.toml
-python3 scripts/onboard.py check     # 检查路径、平台导出、稿件、分类，以及稿件和发布的关联
+python3 scripts/onboard.py check     # 检查路径、平台导出、稿件、选题方向，以及稿件和发布的关联
+python3 scripts/classify.py          # AI 按作品标题划分选题方向并归类（打开工作台时也会自动做）
 python3 scripts/onboard.py scan 目录  # 有生产流水线时，扫一遍文件夹起草阶段配置
 python3 scripts/serve.py             # 打开本地工作台
 ```
@@ -90,6 +91,8 @@ python3 scripts/serve.py             # 打开本地工作台
 - **本地工作台**（`scripts/serve.py`，或双击 `打开工作台.command`）：每次打开都读最新数据。
   插件采集、视频转写、新增稿件、放入新的平台导出，5 秒内自动显示；放入新导出后选题报告自动重算。
   页面上的分析调用本机 agent，状态改动和分析结果存在 `local/data/state/`。
+  选题方向由 AI 按你的作品标题划分，新作品自动归入；分得不合适可以写一句要求重新划分，单条分错可以手动改。
+  采集箱笔记、对标账号、报告都可以在页面上删除，10 秒内可撤销；删掉的文件先移到 `local/data/trash/`，30 天后清掉。
 - **线上工作台**（可选）：发布到 claude.ai 的页面，可以换设备看。对 agent 说「同步工作台」，
   它会合并两边的状态和分析，再发布最新数据。
 
@@ -104,13 +107,15 @@ python3 scripts/serve.py             # 打开本地工作台
 │   ├── serve.py          本地工作台
 │   ├── build_workbench.py 扫描、对账，生成页面
 │   ├── topic_report.py   选题报告
-│   ├── classify.py       选题分类
+│   ├── classify.py       选题方向：AI 划分方向、给作品归类
+│   ├── agent.py          调用本机 agent（分析与归类共用）
 │   ├── benchmark.py      对标数据汇总
 │   ├── ingest_inbox.py   收插件采集的内容
 │   ├── transcribe_inbox.py 视频笔记转写
 │   ├── merge_assets.py   分析并入爆款库
 │   ├── asset_retro.py    复盘爆款库：作品数据记到用过的资产上
 │   ├── sync_state.py     本地与线上同步
+│   ├── trash.py          页面上的删除与撤销
 │   ├── onboard.py        接入检查
 │   └── paths.py          路径与配置
 ├── templates/            页面模板
@@ -138,6 +143,7 @@ python3 scripts/serve.py             # 打开本地工作台
 - 自动运行只在电脑 5 分钟内有操作时进行，到点时间在所选时段内随机
 
 再次采集同一个账号时，新读到的笔记并入原有记录，不会覆盖更早的笔记。
+在工作台删除的对标账号，依次更新再读到时不收；在它的主页手动抓取一次就重新加入。插件批量更新页也能移除账号。
 
 ## 常见问题
 
@@ -146,6 +152,7 @@ python3 scripts/serve.py             # 打开本地工作台
 | 双击「打开工作台」后提示 Python 版本 | 安装 Python 3.11 以上（`brew install python`），再双击 |
 | 插件采集成功，工作台里没出现 | Chrome 改过默认下载位置时，把 `local/config.toml` 的 `download_inbox` 改成「Chrome 下载目录/xhs-inbox」；Chrome 开了「下载前询问保存位置」会每次弹窗，可以关掉 |
 | 点「分析」提示没有找到 Claude Code | 安装 Claude Code，或在 `[analysis]` 换成你在用的 agent 命令 |
+| 选题方向分得不合适 | 在「选题报告」的选题方向里写一句要求（如「把测评和教程分开」）后重新划分；单条在「数据表现 · 全部数据」里改 |
 | 平台数据读不到 | `python3 scripts/onboard.py check` 会指出是哪个平台、缺哪一列；导出表的表头和配置里的列名要一致 |
 | 插件提示「改用 DOM 兜底」或读不到笔记列表 | 小红书改版了页面结构，需要更新 `clipper/extract.js` |
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "小红书采集 · 内容工作台",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "在小红书笔记页或账号主页一键采集，落进本地收件箱，供爆款拆解和对标分析使用。",
   "permissions": [
     "activeTab",

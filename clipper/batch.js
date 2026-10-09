@@ -39,7 +39,8 @@ async function render() {
   const picked = new Set(queue(st, now).map(a => a.userId));
   $("accounts").innerHTML = all.length
     ? `<div class="list">${all.map(a => `<div class="acc${picked.has(a.userId) ? "" : " skip"}">${esc(a.nickname)}<span>${
-        day(a.capturedAt)} 采集${picked.has(a.userId) ? "" : " · 本次跳过"}</span></div>`).join("")}</div>`
+        day(a.capturedAt)} 采集${picked.has(a.userId) ? "" : " · 本次跳过"}<button class="rm" data-uid="${esc(a.userId)}"${
+        running ? " disabled" : ""}>移除</button></span></div>`).join("")}</div>`
     : `<div class="empty">尚无采集过的账号。在对标账号主页使用插件的「抓取这个主页」后，账号显示在此处。</div>`;
 
   $("paused").innerHTML = st.pausedUntil && now < Date.parse(st.pausedUntil)
@@ -54,6 +55,16 @@ async function render() {
   }
   renderSchedule(st);
 }
+
+/** 从批量更新列表移除账号。之后在该账号主页手动抓取，会重新加入 */
+$("accounts").addEventListener("click", async e => {
+  const uid = e.target.closest("button.rm")?.dataset.uid;
+  if (!uid || running) return;
+  const { accounts = {} } = await chrome.storage.local.get("accounts");
+  delete accounts[uid];
+  await chrome.storage.local.set({ accounts });
+  await render();
+});
 
 // ------------------------------------------------------------ 定期更新
 
@@ -199,7 +210,8 @@ async function run() {
     const acc = list[i];
     $("state").textContent = `正在更新 ${i + 1}/${list.length} · ${acc.nickname}`;
     try {
-      const data = await visit(acc);
+      // batch 标记：工作台里删除过的账号，批量更新交来的数据不收
+      const data = { ...(await visit(acc)), batch: true };
       await save(JSON.stringify(data, null, 2),
         `xhs-inbox/profile-${data.capturedAt.slice(0, 10)}-${slug(data.nickname || data.userId)}.json`);
       const { accounts = {} } = await chrome.storage.local.get("accounts");

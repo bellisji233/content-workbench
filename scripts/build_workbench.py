@@ -297,8 +297,12 @@ def load_assets():
         tier = ("top" if grade.startswith("✅") else
                 "down" if grade.startswith("⚠️") else
                 "persona" if "人设组件" in grade or "归因结论" in grade else "untested")
+        # 来源写「同上」时沿用上一条的来源
+        source = cells[1]
+        if source in ("同上", "〃") and cur["assets"]:
+            source = cur["assets"][-1]["source"]
         cur["assets"].append({
-            "name": cells[0].lstrip("⚠️▶ ").strip(), "source": cells[1],
+            "name": cells[0].lstrip("⚠️▶ ").strip(), "source": source,
             "record": cells[2], "grade": grade, "tier": tier,
             "used": "未回流" not in cells[2],
         })
@@ -345,6 +349,8 @@ def load_reports():
     if not wd or not wd.exists():
         return []
 
+    import trash
+    hidden = trash.hidden_reports()       # 页面上删除的条目，键为「批次|样本名」
     batches = []
     for d in sorted(wd.iterdir(), reverse=True):
         if not d.is_dir():
@@ -386,7 +392,10 @@ def load_reports():
             if mods:
                 batch["samples"].append({"name": name, "meta": meta, "modules": mods})
 
-        if batch["samples"]:
+        batch["samples"] = [x for x in batch["samples"] if f"{d.name}|{x['name']}" not in hidden]
+        if f"{d.name}|共性框架" in hidden:
+            batch["common"] = []
+        if batch["samples"] or batch["common"]:
             batches.append(batch)
     return batches
 
@@ -781,9 +790,11 @@ def to_payload(items, pubs, orphans, dupes, platforms):
 
     废弃稿件不进载荷（用户要求前端不展示），只在 meta 里留个计数。
     """
+    import classify
+
     def pub_json(p):
         return {
-            "platform": p["platform"], "title": p["title"],
+            "platform": p["platform"], "title": p["title"], "cat": classify.classify(p["title"]),
             "date": p["date"].isoformat() if p["date"] else None,
             "views": p["views"], "likes": p["likes"], "collects": p["collects"],
             "comments": p["comments"], "fans": p["fans"],
@@ -823,6 +834,7 @@ def to_payload(items, pubs, orphans, dupes, platforms):
                    "owners": [{"path": o["path"], "track": o["track"]} for o in d["owners"]]}
                   for d in dupes],
         "platforms": [platform_stats(pf["rows"], pf["name"]) for pf in platforms],
+        "topics": classify.state([r for pf in platforms for r in pf["rows"]]),
         "stages": [{"key": k, "label": label} for k, label in STAGES],
         "prompts": {f.stem: f.read_text(encoding="utf-8").rstrip("\n")
                     for f in sorted(PROMPTS.glob("*.md")) if f.stem != "README"},

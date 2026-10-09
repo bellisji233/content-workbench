@@ -64,9 +64,11 @@ description: 内容工作台：把稿件、生产流水线、小红书/抖音后
 6. **关联检查**：`onboard.py check` 的「稿件和发布的关联」一节列出没找到稿件的发布。
    逐条和用户确认：稿件在但标题不同 → 写进 `local/status.md`「发布关联」；本来就没有稿件 → 写进「不再补稿」。
    这一步决定复盘爆款库能覆盖多少作品。
-7. **选题分类**：`onboard.py titles` 读出全部标题，按内容方向起草 4–8 个分类写进 `[[categories]]`
-   （优先用 `keywords`），给用户确认后再跑一次 `titles`，「其他」不宜过多。
-8. **分析方式**：默认用本机 Claude Code；用别的 agent 时问它的非交互命令，写 `[analysis]`（`engine = "command"`）。
+7. **分析方式**：默认用本机 Claude Code；用别的 agent 时问它的非交互命令，写 `[analysis]`（`engine = "command"`）。
+8. **选题方向**：`python3 WB/scripts/classify.py` 让 AI 读全部作品标题，划分 4–8 个方向并逐条归类
+   （结果在 `local/data/topics.json`），再用 `classify.py list` 给用户看方向和归类。
+   用户想换分法时 `classify.py partition "要求"`（如「把测评和教程分开」）；单条分错在工作台「数据表现」里改。
+   以后放进新导出，新作品自动归入已有方向，方向不变，报告前后可比。
 9. **采集插件**：`chrome://extensions/` → 开发者模式 → 加载已解压的扩展程序 → 选 `WB/clipper/`。
    「依次更新对标账号」是实验功能，默认关闭，不替用户开启。
 10. **打开**：`python3 WB/scripts/serve.py`。带用户看一眼总览的「数据来源」（每类数据读到了多少、可直接打开文件夹），

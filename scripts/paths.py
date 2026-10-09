@@ -70,6 +70,12 @@ TOPIC_REPORTS = DATA / "topic-reports"
 LOGS = DATA / "logs"
 # 本地工作台的状态与分析，结构和线上数据库一致：state/{collection}/{id}.json
 STATE = DATA / "state"
+# 选题方向：AI 按作品标题划分的方向和每条作品的归类，手动改过的也记在这里
+TOPICS = DATA / "topics.json"
+# 页面上删除的文件先移到这里，可撤销，30 天后清掉
+TRASH = DATA / "trash"
+# 页面上删除、但文件不归工作台管的条目（拆解项目里的历史报告），只从列表里隐藏
+HIDDEN = DATA / "hidden.json"
 
 # 页面
 TEMPLATE = WB / "templates" / "workbench-app.html"

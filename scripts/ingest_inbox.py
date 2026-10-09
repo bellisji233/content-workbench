@@ -17,6 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import benchmark  # noqa: E402
+import trash  # noqa: E402
 from paths import DOWNLOAD_INBOX as SRC, INBOX as DST  # noqa: E402
 
 
@@ -34,12 +35,19 @@ def local_date(iso):
 
 
 def ingest_profile(payload):
-    """账号主页 → 对标数据。返回 (昵称, 新增条数)；数据不全时返回 None。"""
+    """账号主页 → 对标数据。返回 (昵称, 新增条数)；数据不全或账号已删除时返回 None。
+
+    工作台里删掉的账号，插件批量更新再交来时不收；手动抓取主页视为重新加入。
+    """
     uid, notes = payload.get("userId"), payload.get("notes") or []
     if not uid or not notes:
         return None
+    if uid in trash.removed_accounts():
+        if payload.get("batch"):
+            return None
+        trash.set_removed(uid, False)
     new = benchmark.new_notes(uid, notes)
-    keep = {k: v for k, v in payload.items() if k not in ("kind", "warnings")}
+    keep = {k: v for k, v in payload.items() if k not in ("kind", "warnings", "batch")}
     keep["notes"] = benchmark.merge_notes(uid, notes)
     benchmark.save_account(uid, {**keep, "via": "插件"},
                            fetched=local_date(payload.get("capturedAt")))
@@ -77,7 +85,8 @@ def main():
             if got:
                 profiles.append(got)
             else:
-                print(f"  跳过（主页数据不全）：{f.name}")
+                why = "已在工作台删除的账号" if payload.get("userId") in trash.removed_accounts() else "主页数据不全"
+                print(f"  跳过（{why}）：{f.name}")
                 skipped += 1
             if not keep:
                 f.unlink(missing_ok=True)

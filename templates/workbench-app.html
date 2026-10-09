@@ -134,7 +134,9 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .rowhead .r-side{justify-content:flex-end}
 .sth{flex:1;text-align:center;font-family:var(--sans);font-size:10px;letter-spacing:0;
   text-transform:none;color:var(--ink-3)}
-.panel-h .legend{margin:0}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink-2);font-weight:400}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:3px;display:block}
 .row{display:grid;grid-template-columns:1fr 210px 172px;gap:16px;align-items:center;
   padding:12px 22px;transition:background .15s}
 .row+.row{border-top:1px solid var(--line)}
@@ -214,7 +216,9 @@ a.r-acc:hover{color:var(--accent);text-decoration:underline;text-underline-offse
 .search::placeholder{color:var(--ink-3)}
 
 /* 长列表：显示全部、版本切换、左右分栏 */
-.new-chip{float:right;margin-left:8px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.new-chip{display:inline-block;margin-right:7px;padding:1px 7px;vertical-align:1px;
+  background:var(--accent-soft);color:var(--accent);font-weight:600}
+a.r-link.inl{display:inline}
 .more-row{display:block;width:100%;padding:12px;border:none;border-top:1px solid var(--line);
   background:none;color:var(--ink-2);font:inherit;font-size:12.5px;cursor:pointer}
 .more-row:hover{color:var(--accent);background:var(--surface-2)}
@@ -223,14 +227,22 @@ a.r-acc:hover{color:var(--accent);text-decoration:underline;text-underline-offse
   color:var(--ink-2);font-size:15px;line-height:1;cursor:pointer}
 .ver-b:hover:not(:disabled){color:var(--accent)}
 .ver-b:disabled{opacity:.35;cursor:default}
-.ver-s{font-family:var(--mono);font-size:12px;padding:6px 12px;border:none;border-radius:14px;
-  background:var(--surface-2);color:var(--ink);cursor:pointer;max-width:240px}
+.ver-sw{position:relative;display:inline-flex}
+.ver-sw::after{content:"▾";position:absolute;right:11px;top:50%;transform:translateY(-50%);
+  font-size:9px;color:var(--ink-3);pointer-events:none}
+.ver-s{-webkit-appearance:none;appearance:none;font-family:var(--mono);font-size:12px;
+  padding:6px 28px 6px 13px;border:none;border-radius:14px;background:var(--surface-2);
+  color:var(--ink);cursor:pointer;max-width:240px;height:28px;line-height:16px}
+.ver-s:hover{background:var(--surface-3)}
 .ver-meta{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin:0 0 12px}
 .split{display:grid;grid-template-columns:minmax(260px,330px) minmax(0,1fr);gap:18px;align-items:start}
 .split>.panel{margin-bottom:0}
 .list-pane{position:sticky;top:16px;max-height:calc(100vh - 32px);display:flex;flex-direction:column}
 .lp-tools{padding:0 16px 12px;display:flex;flex-direction:column;gap:8px}
 .lp-tools .search{max-width:none;min-width:0;background:var(--surface-2);box-shadow:none}
+.panel-h .seg{box-shadow:none;background:var(--surface-2)}
+.panel-h .seg button{padding:4px 12px}
+.panel-h .search{box-shadow:none;background:var(--surface-2);padding:6px 14px;max-width:220px;min-width:120px}
 .lp-tools .seg{box-shadow:none;background:var(--surface-2);flex-wrap:wrap}
 .lp-tools .seg button{padding:5px 11px}
 .list-pane .rows{overflow-y:auto;min-height:0;border-top:1px solid var(--line)}
@@ -295,12 +307,59 @@ svg.chart{display:block;width:100%;height:auto;font-family:var(--sans)}
 table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:620px}
 th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.06em;
   text-transform:uppercase;color:var(--ink-3);font-weight:500;padding:11px 22px;
-  background:var(--surface-2);white-space:nowrap;position:sticky;top:0}
+  background:var(--surface-2);white-space:nowrap}
 th.r,td.r{text-align:right}
 td{padding:11px 22px;vertical-align:middle}
 tbody tr+tr td{border-top:1px solid var(--line)}
-td.r{font-family:var(--mono);font-variant-numeric:tabular-nums}
+td.r,td.d{font-family:var(--mono);font-variant-numeric:tabular-nums}
+td.d{color:var(--ink-2)}
 tbody tr:hover{background:var(--surface-2)}
+
+th.sort{padding:0}
+th.sort button{display:flex;align-items:center;gap:4px;width:100%;padding:11px 22px;
+  font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;white-space:nowrap}
+th.sort.r button{justify-content:flex-end}
+th.sort button:hover{color:var(--ink)}
+th.sort[aria-sort] button{color:var(--accent);font-weight:600}
+th.sort .ar{font-size:9px;width:8px;text-align:center}
+.del-b{display:inline-flex;align-items:center;justify-content:center;flex:none;
+  height:28px;padding:0 10px;border-radius:14px;font-size:12px;color:var(--ink-3);
+  white-space:nowrap;transition:background .15s,color .15s,opacity .15s}
+.del-b:hover{background:var(--accent-soft);color:var(--accent)}
+.row .del-b.hov{opacity:0}
+.row:hover .del-b.hov,.row:focus-within .del-b.hov{opacity:1}
+@media(hover:none){.row .del-b.hov{opacity:1}}
+.ext-a{font-size:11.5px;color:var(--ink-3);text-decoration:none;white-space:nowrap}
+.ext-a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;
+  display:flex;align-items:center;gap:16px;padding:10px 10px 10px 18px;border-radius:14px;
+  background:var(--ink);color:var(--surface);font-size:13px;box-shadow:var(--sh-lift);
+  max-width:calc(100vw - 32px)}
+.toast span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast button{padding:5px 12px;border-radius:10px;font-weight:600;color:inherit;
+  background:color-mix(in srgb, currentColor 14%, transparent);white-space:nowrap}
+.toast button:hover{background:color-mix(in srgb, currentColor 24%, transparent)}
+.toast.err{background:var(--accent);color:#fff}
+.bar.sticky{position:sticky;top:12px;z-index:5;width:fit-content;max-width:100%;
+  background:var(--surface);border-radius:22px;padding:6px;box-shadow:var(--sh)}
+.bar.sticky .tab{box-shadow:none}
+.rec-full{white-space:normal!important}
+.cat-b{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;
+  background:var(--surface-2);font-size:12px;color:var(--ink-2);white-space:nowrap}
+.cat-b:hover{background:var(--surface-3);color:var(--ink)}
+.cat-b .car{font-size:8px;opacity:.55}
+.cat-t{font-size:12px;color:var(--ink-2)}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.cat-card{background:var(--surface-2);border-radius:var(--r-sm);padding:11px 13px}
+.cat-card .cc-h{display:flex;align-items:baseline;gap:8px;font-size:13px}
+.cat-card .cc-h span{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.cat-card p{margin:4px 0 0;font-size:11.5px;line-height:1.5;color:var(--ink-2);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cat-notes{display:flex;flex-direction:column;gap:4px;margin-top:12px}
+.cat-notes .r-p,.cat-notes .r-note{white-space:normal}
+.r-perf.clamp2{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.more-t{display:block;margin-top:3px;font-size:11px;color:var(--ink-3)}
+.row:hover .more-t{color:var(--accent)}
 
 /* ---- 拆解报告 ---- */
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
@@ -339,6 +398,9 @@ tbody tr:hover{background:var(--surface-2)}
 .md table{margin:4px 0 12px;font-size:12px;min-width:0;width:100%}
 .md th{padding:8px 11px;border-radius:0;font-size:9.5px;background:var(--surface-2)}
 .md td{padding:8px 11px}
+.md th[align=right],.md td[align=right]{text-align:right}
+.md th[align=center],.md td[align=center]{text-align:center}
+.md td[align=right]{font-variant-numeric:tabular-nums;white-space:nowrap}
 .md h1,.md h2,.md h3,.md h4{font-size:13px;font-weight:700;color:var(--ink);margin:14px 0 7px}
 .md hr{border:none;border-top:1px solid var(--line);margin:14px 0}
 .mdwrap{overflow-x:auto}
@@ -481,7 +543,11 @@ function api(path, opts = {}){
 
 async function apiOk(path, opts){
   const r = await api(path, opts);
-  if (!r.ok) throw new Error(`本机服务返回 ${r.status}`);
+  if (!r.ok){
+    let msg = `本机服务返回 ${r.status}`;
+    try { const j = await r.clone().json(); if (j.error) msg = j.error; } catch(e){ /* 不是 JSON 就用状态码 */ }
+    throw new Error(msg);
+  }
   return r;
 }
 
@@ -576,6 +642,7 @@ const LS = "workbench.v1";
 
 /* 看过的近期爆款（账号 + 标题）。待办只数没看过的，打开「近期爆款」后清零 */
 const seenHot = new Set();
+const dbKeys = new Set();     // 上次从数据库读到的分析记录 id，用来认出在别处删掉的
 const freshHot = new Set();   // 这次打开页面时才看到的，「新」标记保留到刷新页面
 const hotKey = n => (n.userId || n.account) + "|" + n.title;
 function unseenHot(){
@@ -586,7 +653,7 @@ function unseenHot(){
 function saveLocal(){
   try {
     localStorage.setItem(LS, JSON.stringify({
-      overrides, analyses, seenHot: [...seenHot].slice(-500),
+      overrides, analyses, seenHot: [...seenHot].slice(-500), dbKeys: [...dbKeys],
       queued: queuedOps,          // 还没写进远端的改动，刷新后继续补
     }));
   } catch(e){ /* 隐私模式或存储被禁，降级为仅本次会话有效 */ }
@@ -600,6 +667,7 @@ function loadLocal(){
     Object.assign(overrides, v.overrides || {});
     // 旧版本把选题推荐存成了 n_topics_* 的重复 key，读入时丢掉
     (v.seenHot || []).forEach(k => seenHot.add(k));
+    (v.dbKeys || []).forEach(k => dbKeys.add(k));
     Object.entries(v.analyses || {}).forEach(([k, a]) => {
       if (!k.startsWith("n_topics_")) analyses[k] = a;
     });
@@ -800,8 +868,9 @@ function row(it){
 
   if (it.track === "流水线"){
     const st = el("div","stages");
+    const ongoing = ["?","生产中","待发布","未发布"].includes(s);     // 已发布、停掉的不再有卡点
     Object.entries(it.stages).forEach(([k,done]) => {
-      const cls = done ? "done" : (it.stuckAt===STAGE_LABELS[k] ? "miss" : "");
+      const cls = done ? "done" : (ongoing && it.stuckAt===STAGE_LABELS[k] ? "miss" : "");
       const c = el("span", "st "+cls, k);
       c.title = STAGE_LABELS[k] + (done ? " ✓" : "");
       st.appendChild(c);
@@ -834,7 +903,10 @@ function scatter(pubs){
   const sx = v => ML + Math.sqrt(v/maxV)*iw;
   const sy = r => MT + ih - (r/yMax)*ih;
 
-  const base = [0,500,2000,5000,10000].filter(t=>t<=maxV);
+  // 刻度跟着最大值走：平方根标度上均匀取点，再取整到 1/2/5 开头的整数
+  const nice = x => { if (x <= 0) return 0; const e = 10 ** Math.floor(Math.log10(x)), f = x / e;
+                      return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * e; };
+  const base = [...new Set([0, .2, .45, .7].map(t => nice(maxV * t * t)))].filter(t => t <= maxV);
   // 末位刻度是真实最大值，离前一个太近就不画，否则两个数字叠在一起
   const xTicks = sx(maxV) - sx(base[base.length-1]) > 46 ? base.concat([Math.round(maxV)]) : base;
   const yTicks = Array.from({length:yMax+1},(_,i)=>i);
@@ -977,11 +1049,183 @@ function versionPicker(versions, sel, pick){
     s.appendChild(o);
   });
   s.onchange = () => { pick(s.value); renderView(); };
+  const sw = el("span","ver-sw"); sw.appendChild(s);
   const newer = el("button","ver-b","›");
   newer.title = "较新的一份"; newer.disabled = i <= 0;
   newer.onclick = () => { pick(versions[i - 1].key); renderView(); };
-  box.appendChild(older); box.appendChild(s); box.appendChild(newer);
+  box.appendChild(older); box.appendChild(sw); box.appendChild(newer);
   return box;
+}
+
+/* ---------- 选题方向 ---------- */
+const TOPICS = DATA.topics || { categories: [] };
+const JOB = DATA.topicsJob || { status: "idle" };
+
+async function topicsApi(body){
+  return (await apiOk("/api/topics", { method: "POST", body: JSON.stringify(body) })).json();
+}
+
+/** 改一条作品的方向：本地服务改完会重算当天报告，整页刷新 */
+function openCatMenu(anchor, title, cur){
+  const m = $("#menu"); m.innerHTML = "";
+  [...TOPICS.categories.map(c => c.name), "其他"].forEach(name => {
+    const b = el("button","", `<span class="dot" style="background:${name === cur ? "var(--accent)" : "var(--line-2)"}"></span>${esc(name)}`);
+    b.onclick = async () => {
+      closeMenu();
+      try {
+        await topicsApi({ action: "assign", title, cat: name });
+        toast = { text: `已改为「${name}」`, until: Date.now() + 4000 };
+        saveView(); location.reload();
+      } catch(e){ showToast({ text: "修改失败：" + e.message, err: true }); }
+    };
+    m.appendChild(b);
+  });
+  m.appendChild(el("div","hint", "修改后选题报告随之更新"));
+  const r = anchor.getBoundingClientRect();
+  m.classList.add("on");
+  const mh = m.offsetHeight;
+  m.style.left = Math.min(r.left, innerWidth - m.offsetWidth - 12) + "px";
+  m.style.top  = (r.bottom + mh + 8 > innerHeight ? r.top - mh - 6 : r.bottom + 6) + "px";
+}
+
+/** 选题报告里的「选题方向」面板：方向说明、各方向条数、重新划分 */
+function topicsPanel(){
+  const T = TOPICS, run = JOB.status === "running";
+  const p = el("div","panel");
+  p.appendChild(el("div","panel-h", `<h2>选题方向</h2><span class="sub">${
+    T.categories.length ? `${T.categories.length} 个方向 · 由 AI 按作品标题划分` : T.legacy ? "按关键词规则归类" : "尚未划分"}</span>`));
+  const b = el("div","panel-b");
+
+  if (T.categories.length){
+    const g = el("div","cat-grid");
+    T.categories.forEach(c => g.appendChild(el("div","cat-card",
+      `<div class="cc-h"><strong>${esc(c.name)}</strong><span>${c.n} 条</span></div><p>${esc(c.desc || "")}</p>`)));
+    b.appendChild(g);
+  }
+
+  const notes = [];
+  if (run) notes.push(`<span class="thinking">${!T.categories.length ? "正在划分选题方向"
+    : JOB.kind === "partition" ? "正在重新划分选题方向" : "正在给新作品归类"}，完成后报告自动更新</span>`);
+  else if (JOB.status === "error") notes.push(`<span class="r-note">选题方向更新失败：${esc(JOB.error)}</span>`);
+  if (!run && T.pending) notes.push(`<span class="r-p">${T.pending} 条作品尚未归类</span>`);
+  if (T.other) notes.push(`<span class="r-p">${T.other} 条作品未归入任何方向</span>`);
+  if (!T.categories.length && !run && !T.legacy) notes.push(`<span class="r-p">${
+    LOCAL ? "放入平台导出数据后自动划分，也可以手动开始。" : "在本地工作台放入平台导出数据后自动划分。"}</span>`);
+  if (notes.length) b.appendChild(el("div","cat-notes", notes.join("")));
+
+  if (LOCAL && DATA.topicsAgent){
+    const bar = el("div","bar"); bar.style.margin = "14px 0 0";
+    if (!run && (T.pending || JOB.status === "error") && T.categories.length){
+      const go = el("button","tab on", T.pending ? `给 ${T.pending} 条作品归类` : "重新归类");
+      go.onclick = () => startTopics({ action: "ensure" }, go);
+      bar.appendChild(go);
+    }
+    const hint = el("input","search");
+    hint.placeholder = "对划分的要求（可选），例如：把测评和教程分开";
+    hint.maxLength = 200; hint.disabled = run;
+    const re = el("button", T.categories.length ? "tab" : "tab on", T.categories.length ? "重新划分" : "划分选题方向");
+    re.disabled = run;
+    re.onclick = () => startTopics({ action: "partition", hint: hint.value }, re);
+    hint.addEventListener("keydown", e => { if (e.key === "Enter" && !run) re.click(); });
+    bar.appendChild(hint); bar.appendChild(re);
+    if (T.hasPrev && !run){
+      const un = el("button","tab","恢复上一次划分");
+      un.onclick = async () => {
+        try { await topicsApi({ action: "undo" }); saveView(); location.reload(); }
+        catch(e){ showToast({ text: "恢复失败：" + e.message, err: true }); }
+      };
+      bar.appendChild(un);
+    }
+    b.appendChild(bar);
+    if (T.categories.length) b.appendChild(el("p","ver-meta", "单条作品的方向可在「数据表现 · 全部数据」中修改"));
+  }
+  p.appendChild(b);
+  return p;
+}
+
+async function startTopics(body, btn){
+  btn.disabled = true;
+  try { await topicsApi(body); saveView(); location.reload(); }
+  catch(e){ btn.disabled = false; showToast({ text: "没有开始：" + e.message, err: true }); }
+}
+
+/* ---------- 删除与撤销 ----------
+   文件类（采集箱笔记、对标账号、自有内容分析、历史拆解报告）只在本地工作台能删：
+   移进回收站，整页刷新拿新数据，撤销提示跨刷新保留。
+   分析记录（拆解分析、选题推荐）存在数据库里，线上线下都能删，撤销就是写回去。 */
+let toast = null;          // {text, undo, until, err}
+let toastTimer = null;
+const TOAST_MS = 10000;
+
+function showToast(t){
+  toast = t ? { ...t, until: t.until || Date.now() + TOAST_MS } : null;
+  paintToast();
+}
+
+function paintToast(){
+  document.querySelector(".toast")?.remove();
+  clearTimeout(toastTimer);
+  if (!toast || Date.now() >= toast.until){ toast = null; return; }
+  const box = el("div","toast" + (toast.err ? " err" : ""));
+  box.setAttribute("role","status");
+  box.appendChild(el("span","", esc(toast.text)));
+  if (toast.undo){
+    const u = toast.undo;
+    const b = el("button","","撤销");
+    b.onclick = () => undoDelete(u);
+    box.appendChild(b);
+  }
+  document.body.appendChild(box);
+  toastTimer = setTimeout(() => { toast = null; box.remove(); }, toast.until - Date.now());
+}
+
+async function undoDelete(u){
+  showToast(null);
+  if (u.token){
+    try { await apiOk("/api/restore", { method: "POST", body: JSON.stringify({ token: u.token }) }); }
+    catch(e){ showToast({ text: "撤销失败：" + e.message, err: true }); return; }
+    saveView(); location.reload();
+    return;
+  }
+  if (u.analysis){
+    const { key, data } = u.analysis;
+    analyses[key] = data;
+    saveLocal(); renderNav(); renderView();
+    await persist({ kind: "set", path: `analyses/${key}`, data });
+  }
+}
+
+/** 删除文件类条目，仅本地工作台 */
+async function deleteFiles(kind, ids, text){
+  try {
+    const r = await apiOk("/api/delete", { method: "POST", body: JSON.stringify({ kind, ids }) });
+    const { token } = await r.json();
+    if (kind === "inbox") ids.forEach(id => picked.delete(id));
+    toast = { text, undo: { token }, until: Date.now() + TOAST_MS };
+    saveView(); location.reload();
+  } catch(e){
+    showToast({ text: "删除失败：" + e.message, err: true });
+  }
+}
+
+/** 删除一份分析记录（拆解分析或选题推荐） */
+async function deleteAnalysis(key){
+  const data = analyses[key];
+  if (!data) return;
+  delete analyses[key];
+  saveLocal(); renderNav(); renderView();
+  showToast({ text: data.kind === "选题推荐" ? `已删除 ${stamp(data.createdAt)} 的选题推荐`
+                                             : `已删除「${cut(data.title || data.kind, 20)}」`,
+              undo: { analysis: { key, data } } });
+  await persist({ kind: "del", path: `analyses/${key}` });
+}
+
+/** 删除按钮。hover = 只在鼠标移到所在行时显示 */
+function delBtn(onClick, { hover = false, label = "删除", title = "" } = {}){
+  const b = el("button", "del-b" + (hover ? " hov" : ""), label);
+  if (title){ b.title = title; b.setAttribute("aria-label", title); }
+  b.onclick = e => { e.stopPropagation(); onClick(); };
+  return b;
 }
 
 function head(title, desc){
@@ -1047,8 +1291,9 @@ function vOverview(){
   // 主力方向：选题报告的结论，写稿前最该记住的一句
   if (report && report.lead){
     const c = el("div","call");
+    const lead = report.lead.replace(/^\*\*主力方向是「(.+?)」。\*\*\s*/, "**$1**　");
     c.innerHTML = `<h3>主力方向</h3>
-      <p>${md(report.lead).replace(/^<p>|<\/p>\s*$/g,"")}</p>
+      <p>${md(lead).replace(/^<p>|<\/p>\s*$/g,"")}</p>
       <p style="font-size:12.5px;color:var(--ink-3)">出自 ${esc(report.date)} 选题报告</p>`;
     w.appendChild(c);
   }
@@ -1058,6 +1303,9 @@ function vOverview(){
   pp.appendChild(el("div","panel-h", `<h2>平台</h2><span class="sub">按最新导出</span>`));
   const pb = el("div","panel-b flush");
   const prows = el("div","rows");
+  const perOf = name => { const a = pubs.filter(x => x.platform === name);
+    const v = a.reduce((s,x)=>s+x.views,0); return v ? a.reduce((s,x)=>s+x.fans,0) / v * 1000 : 0; };
+  const maxPer = Math.max(...DATA.platforms.map(pf => perOf(pf.name)), 0.001);
   DATA.platforms.filter(pf => pf.n).forEach(pf=>{
     const arr = pubs.filter(x=>x.platform===pf.name);
     const f = arr.reduce((a,x)=>a+x.fans,0), v = arr.reduce((a,x)=>a+x.views,0);
@@ -1071,7 +1319,7 @@ function vOverview(){
     const per = v ? f/v*1000 : 0;
     const side = el("div","r-side");
     side.innerHTML = `<span class="minibar"><i style="width:${
-      Math.min(100, per/8*100).toFixed(1)}%;background:${PLAT_COLOR[pf.name]}"></i></span>
+      Math.min(100, per/maxPer*100).toFixed(1)}%;background:${PLAT_COLOR[pf.name]}"></i></span>
       <span class="idle">${per.toFixed(2)}‰ 涨粉</span>`;
     r.appendChild(side);
     prows.appendChild(r);
@@ -1096,7 +1344,9 @@ function vOverview(){
       `<span>播放 ${fmt(p.views)}</span><span>收藏 ${p.collects}</span>${
         p.bounce2s ? `<span class="chip">2s跳出 ${(p.bounce2s*100).toFixed(0)}%</span>` : ""}`));
     const side = el("div","r-side");
-    const t = el("span","stat-btn " + (p.fans>=10 ? "s-green" : p.fans>0 ? "s-amber" : "s-grey"));
+    // 绿 = 这条的涨粉效率不低于账号整体
+    const t = el("span","stat-btn " + (p.fans && p.views && p.fans/p.views >= totalFans/totalViews ? "s-green"
+                                       : p.fans>0 ? "s-amber" : "s-grey"));
     t.style.cursor="default";
     t.innerHTML = `<span class="dot"></span><span>+${p.fans} 粉</span>`;
     side.appendChild(t); r.appendChild(side);
@@ -1297,11 +1547,13 @@ function vAnalytics(){
   sc.appendChild(scb); w.appendChild(sc);
   setTimeout(()=>attachScatterTips(scb, all), 0);
 
-  const top = [...all].filter(p=>p.views>500)
+  const vs = all.map(p => p.views).sort((a,b) => a - b);
+  const medV = vs.length ? vs[Math.floor(vs.length / 2)] : 0;
+  const top = [...all].filter(p=>p.views>=medV && p.views>0)
     .sort((a,b)=>pctOf(b.collects,b.views)-pctOf(a.collects,a.views)).slice(0,10);
   const bp = el("div","panel");
   bp.appendChild(el("div","panel-h",
-    `<h2>收藏率排行</h2><span class="sub">播放 &gt; 500 的内容</span>`));
+    `<h2>收藏率排行</h2><span class="sub">播放 ≥ ${fmt(medV)}（中位数）的内容</span>`));
   const bb = el("div","panel-b");
   bb.innerHTML = barList(top.map(p=>({
     label: cut(p.title,30), sub: `${p.platform} · ${fmt(p.views)} 播放 · +${p.fans} 粉`,
@@ -1338,37 +1590,106 @@ function vAnalytics(){
     bp.appendChild(bb); w.appendChild(bp);
   }
 
+  w.appendChild(pubTable(all, P));
+  return w;
+}
+
+/* 全部数据：点表头按任意一列排序，再点一次反向；空值总在最后 */
+let pubSort = { k: "views", d: -1 };
+let pubPlat = "全部";
+const PUB_COLS = [
+  { k: "title",    label: "标题" },
+  { k: "platform", label: "平台" },
+  { k: "cat",      label: "方向" },
+  { k: "date",     label: "日期" },
+  { k: "views",    label: "播放",   num: true },
+  { k: "likes",    label: "点赞",   num: true },
+  { k: "collects", label: "收藏",   num: true },
+  { k: "rate",     label: "收藏率", num: true, v: p => p.views ? p.collects / p.views : null },
+  { k: "fans",     label: "涨粉",   num: true },
+  { k: "bounce2s", label: "2s跳出", num: true, v: p => p.bounce2s || null },
+  { k: "finish5s", label: "5s完播", num: true, v: p => p.finish5s || null },
+];
+
+function sortPubs(list){
+  const col = PUB_COLS.find(c => c.k === pubSort.k) || PUB_COLS[3];
+  const val = col.v || (p => p[col.k]);
+  const empty = x => x === null || x === undefined || x === "";
+  return [...list].sort((a, b) => {
+    const x = val(a), y = val(b);
+    if (empty(x) || empty(y)) return empty(x) - empty(y);
+    return (col.num ? x - y : String(x).localeCompare(String(y), "zh")) * pubSort.d;
+  });
+}
+
+function pubTable(all, P){
   const tp = el("div","panel");
-  tp.appendChild(el("div","panel-h",`<h2>全部数据</h2><span class="sub">${all.length} 条 · 按播放量</span>`));
+  const list = sortPubs(all.filter(p => (pubPlat === "全部" || p.platform === pubPlat)
+    && matchQ("pubs", p.title, p.cat)));
+  const ph = el("div","panel-h", `<h2>全部数据</h2>`);
+  if (P.length > 1){
+    const seg = el("div","seg");
+    ["全部", ...P.map(p => p.name)].forEach(f => {
+      const n = f === "全部" ? all.length : all.filter(p => p.platform === f).length;
+      const b = el("button", f === pubPlat ? "on" : "", `${esc(f)}<span class="segn">${n}</span>`);
+      b.onclick = () => { pubPlat = f; renderView(); };
+      seg.appendChild(b);
+    });
+    ph.appendChild(seg);
+  }
+  ph.appendChild(searchBox("pubs", "搜索标题或方向…"));
+  ph.appendChild(el("span","sub", `${list.length} 条`));
+  tp.appendChild(ph);
+
   const tb = el("div","panel-b flush");
-  tb.innerHTML = `<div class="tw"><table><thead><tr>
-    <th>标题</th><th>平台</th><th>日期</th><th class="r">播放</th><th class="r">点赞</th>
-    <th class="r">收藏</th><th class="r">收藏率</th><th class="r">涨粉</th>
-    <th class="r">2s跳出</th><th class="r">5s完播</th></tr></thead><tbody>` +
-    [...all].sort((a,b)=>b.views-a.views).slice(0, shown.allPubs ? Infinity : 30).map(p=>`<tr>
-      <td>${esc(cut(p.title,34))}</td>
-      <td><span style="color:${PLAT_COLOR[p.platform]}">●</span> ${p.platform}</td>
-      <td class="r nw">${p.date||"—"}</td>
-      <td class="r">${fmt(p.views)}</td><td class="r">${p.likes}</td>
-      <td class="r">${p.collects}</td>
-      <td class="r">${pctOf(p.collects,p.views).toFixed(1)}%</td>
-      <td class="r">+${p.fans}</td>
-      <td class="r" style="color:${p.bounce2s ? (p.bounce2s<0.45?"var(--ok)":p.bounce2s>0.55?"var(--accent)":"inherit") : "inherit"}">${
-        p.bounce2s ? (p.bounce2s*100).toFixed(1)+"%" : "—"}</td>
-      <td class="r">${p.finish5s ? (p.finish5s*100).toFixed(1)+"%" : "—"}</td>
+  const cap = shown.allPubs || (queries.pubs || "").trim() ? Infinity : 30;
+  const pct1 = x => x ? (x * 100).toFixed(1) + "%" : "—";
+  // 2s 跳出率按本账号中位数上下 10% 着色
+  const bs = all.map(p => p.bounce2s).filter(Boolean).sort((a, b) => a - b);
+  const medB = bs.length ? bs[Math.floor(bs.length / 2)] : 0;
+  const bColor = b => !b || !medB ? "inherit" : b < medB * 0.9 ? "var(--ok)" : b > medB * 1.1 ? "var(--accent)" : "inherit";
+  tb.innerHTML = `<div class="tw"><table><thead><tr>` +
+    PUB_COLS.map(c => {
+      const on = c.k === pubSort.k;
+      return `<th class="sort${c.num ? " r" : ""}"${on ? ` aria-sort="${pubSort.d < 0 ? "descending" : "ascending"}"` : ""}>
+        <button data-k="${c.k}" title="按${c.label}排序">${c.label}<span class="ar">${on ? (pubSort.d < 0 ? "↓" : "↑") : ""}</span></button></th>`;
+    }).join("") + `</tr></thead><tbody>` +
+    list.slice(0, cap).map(p => `<tr>
+      <td title="${esc(p.title)}">${esc(cut(p.title, 34))}</td>
+      <td class="nw"><span style="color:${PLAT_COLOR[p.platform]}">●</span> ${esc(p.platform)}</td>
+      <td class="nw">${LOCAL ? `<button class="cat-b" data-t="${esc(p.title)}">${esc(p.cat || "—")}<span class="car">▾</span></button>`
+                             : `<span class="cat-t">${esc(p.cat || "—")}</span>`}</td>
+      <td class="nw d">${p.date || "—"}</td>
+      <td class="r">${fmt(p.views)}</td><td class="r">${fmt(p.likes)}</td>
+      <td class="r">${fmt(p.collects)}</td>
+      <td class="r">${pctOf(p.collects, p.views).toFixed(1)}%</td>
+      <td class="r">+${fmt(p.fans)}</td>
+      <td class="r" style="color:${bColor(p.bounce2s)}">${pct1(p.bounce2s)}</td>
+      <td class="r">${pct1(p.finish5s)}</td>
       </tr>`).join("") + `</tbody></table></div>`;
-  if (!shown.allPubs && all.length > 30){
-    const more = el("button","more-row", `显示全部 ${all.length} 条`);
+  tb.querySelectorAll(".cat-b").forEach(b => b.onclick = e => {
+    e.stopPropagation(); openCatMenu(b, b.dataset.t, b.firstChild.textContent);
+  });
+  tb.querySelectorAll("th button").forEach(b => b.onclick = () => {
+    const c = PUB_COLS.find(x => x.k === b.dataset.k);
+    pubSort = pubSort.k === c.k ? { k: c.k, d: -pubSort.d }
+            : { k: c.k, d: c.num || c.k === "date" ? -1 : 1 };     // 数字、日期默认从大到小
+    renderView();
+  });
+  if (!list.length) tb.appendChild(el("div","empty","<p>无匹配的内容</p>"));
+  if (list.length > cap){
+    const more = el("button","more-row", `显示全部 ${list.length} 条`);
     more.onclick = () => { shown.allPubs = true; renderView(); };
     tb.appendChild(more);
   }
-  tp.appendChild(tb); w.appendChild(tp);
-  return w;
+  tp.appendChild(tb);
+  return tp;
 }
 
 
 
 let libFilter = "全部";
+const openAssets = new Set();   // 展开了使用记录全文的资产
 let retroPlan = null;      // 复盘建议：{records, skips, newAssets}，勾选后写入
 let retroMsg = null;       // 写入结果：{done, errors}
 
@@ -1635,6 +1956,7 @@ function vTopics(){
     const ph = el("div","panel-h", `<h2>选题推荐</h2>`);
     ph.appendChild(versionPicker(recs.map(r => ({ key: r.key, label: stamp(r.createdAt) || r.benchAt })),
       topicSel, k => { topicSel = k; }));
+    if (db) ph.appendChild(delBtn(() => deleteAnalysis(cur.key), { title: "删除这份选题推荐" }));
     p.appendChild(ph);
     const b = el("div","panel-b");
     b.appendChild(el("p","ver-meta", `生成于 ${esc(stamp(cur.createdAt))}${
@@ -1649,21 +1971,24 @@ function vTopics(){
   // 自有内容分析：历次报告留档，本地工作台可手动重新生成
   if (LOCAL){
     const act = el("div","bar");
-    const go = el("button","tab on","◈ 重新生成报告");
+    const label = R.length ? "◈ 重新生成报告" : "◈ 生成报告";
+    const go = el("button","tab on", label);
+    go.disabled = JOB.status === "running";          // 选题方向更新完会自动重算
     const note = el("span","sync", R.length ? `<i></i>最新一份生成于 ${esc(R[0].date)}` : "");
+    if (!R.length) note.style.display = "none";
     go.onclick = async ()=>{
       go.disabled = true; go.textContent = "生成中…";
       try {
         const r = await apiOk("/api/topic-report", { method: "POST", body: "{}" });
         const j = await r.json();
         if (!j.changed){
-          go.textContent = "◈ 重新生成报告"; go.disabled = false;
+          go.textContent = label; go.disabled = false; note.style.display = "";
           note.innerHTML = `<i></i>数据无变化，最新一份仍是 ${esc(j.date)}`;
           return;
         }
         ownSel = j.date; saveView(); location.reload();
       } catch(e){
-        go.textContent = "◈ 重新生成报告"; go.disabled = false;
+        go.textContent = label; go.disabled = false; note.style.display = "";
         note.className = "sync off"; note.innerHTML = `<i></i>生成失败：${esc(e.message)}`;
       }
     };
@@ -1671,11 +1996,15 @@ function vTopics(){
     w.appendChild(act);
   }
 
+  w.appendChild(topicsPanel());
+
   if (!R.length){
     const p = el("div","panel");
     p.appendChild(el("div","panel-b", `<div class="empty">
       <div class="eg">◈</div><h3>暂无报告</h3>
-      <p>放入平台后台导出的数据后自动生成，文件夹见总览「数据来源」。</p></div>`));
+      <p>${JOB.status === "running" ? "选题方向划分完成后自动生成。"
+         : LOCAL ? "放入新的平台导出数据后自动生成，也可点击「生成报告」。"
+                 : "放入平台后台导出的数据后自动生成，文件夹见总览「数据来源」。"}</p></div>`));
     w.appendChild(p); return w;
   }
 
@@ -1684,6 +2013,8 @@ function vTopics(){
   const p = el("div","panel");
   const ph = el("div","panel-h", `<h2>${esc(cur.label)}</h2>`);
   ph.appendChild(versionPicker(R.map(r => ({ key: r.date, label: r.date })), ownSel, k => { ownSel = k; }));
+  if (LOCAL) ph.appendChild(delBtn(() => deleteFiles("topic-report", [`${cur.date}-${cur.kind}`],
+    `已删除 ${cur.date} 的${cur.label}`), { title: "删除这份报告" }));
   p.appendChild(ph);
   const b = el("div","panel-b");
   b.innerHTML = `<div class="mdwrap"><div class="md report">${md(cur.body)}</div></div>`;
@@ -1703,17 +2034,17 @@ function vReports(){
     .filter(([,a])=>a.kind !== "选题推荐")
     .sort((a,b)=>(b[1].createdAt||"").localeCompare(a[1].createdAt||""))
     .forEach(([k,a])=>entries.push({
-      key:"a_"+k, group:"工作台", title:a.title, kind:a.kind,
+      key:"a_"+k, aKey:k, group:"工作台", title:a.title, kind:a.kind, savedAt:a.savedAt,
       meta:(a.createdAt||"").slice(0,10),
       unit: a.ids && a.ids.length>1 ? `${a.ids.length} 篇` : "单篇",
       partial:a.partial, markdown:a.markdown }));
   R.forEach((b,bi)=>{
     b.samples.forEach((sm,si)=>entries.push({
-      key:`s_${bi}_${si}`, group:b.name, title:sm.name.replace(/^样本拆解\s*·\s*/,""),
+      key:`s_${bi}_${si}`, hide:`${b.name}|${sm.name}`, group:b.name, title:sm.name.replace(/^样本拆解\s*·\s*/,""),
       kind:"样本拆解", meta:b.generated||"", unit:`${sm.modules.length} 模块`,
       modules:sm.modules, sampleMeta:sm.meta, overview:b.overview, reportHtml:b.reportHtml }));
     if (b.common && b.common.length)
-      entries.push({ key:`c_${bi}`, group:b.name, title:"共性框架", kind:"跨样本归纳",
+      entries.push({ key:`c_${bi}`, hide:`${b.name}|共性框架`, group:b.name, title:"共性框架", kind:"跨样本归纳",
                      meta:b.generated||"", unit:`${b.common.length} 节`, modules:b.common });
   });
 
@@ -1774,21 +2105,32 @@ function vReports(){
   if (!cur) return w;
 
   const dp = el("div","panel");
-  dp.appendChild(el("div","panel-h",
+  const dh = el("div","panel-h",
     `<h2>${esc(cur.title)}</h2><span class="sub">${esc(cur.group)}${
-      cur.meta ? " · "+esc(cur.meta) : ""}</span>`));
+      cur.meta ? " · "+esc(cur.meta) : ""}</span>`);
+  if (cur.aKey && db) dh.appendChild(delBtn(() => deleteAnalysis(cur.aKey), { title: "删除这份报告" }));
+  if (cur.hide && LOCAL) dh.appendChild(delBtn(() => deleteFiles("report", [cur.hide],
+    `已删除「${cut(cur.title, 20)}」`), { title: "删除这份报告" }));
+  dp.appendChild(dh);
   const db2 = el("div","panel-b");
 
   // 工作台分析：markdown 正文 + 导出
   if (cur.markdown !== undefined){
     if (downloads){
       const bar2 = el("div","bar");
-      const ex = el("button","tab on","↓ 保存到爆款库");
+      const ex = el("button", cur.savedAt ? "tab" : "tab on", cur.savedAt ? "已保存到爆款库 · 再次保存" : "↓ 保存到爆款库");
       ex.onclick = async ()=>{
-        const r = await exportAnalysis(analyses[cur.key.slice(2)]);
-        if (r && typeof r.added === "number")
-          ex.textContent = r.added ? `已并入 ${r.added} 条` : "爆款库已有，未新增";
-        else if (r) ex.textContent = "已保存";
+        const rec = analyses[cur.aKey];
+        const r = await exportAnalysis(rec);
+        if (!r) return;
+        ex.textContent = typeof r.added === "number"
+          ? (r.added ? `已并入 ${r.added} 条` : "爆款库已有，未新增") : "已保存";
+        ex.className = "tab";
+        if (rec && !rec.savedAt){
+          rec.savedAt = new Date().toISOString();
+          saveLocal();
+          await persist({ kind: "set", path: `analyses/${cur.aKey}`, data: rec });
+        }
       };
       bar2.appendChild(ex);
       db2.appendChild(bar2);
@@ -2039,6 +2381,13 @@ async function runTopicRec(){
   }
 }
 
+/** 粉丝数：纯数字超过一万写成「24.0万」，平台已经给了「1.2万」这类写法就原样显示 */
+function fansText(v){
+  const n = Number(String(v ?? "").replace(/,/g, ""));
+  if (!String(v ?? "").trim() || isNaN(n)) return String(v ?? "—");
+  return n >= 10000 ? (n / 10000).toFixed(1) + "万" : fmt(n);
+}
+
 const profileUrl = (id, url) => id ? "https://www.xiaohongshu.com/user/profile/" + encodeURIComponent(id)
   : /^https:\/\/www\.xiaohongshu\.com\//.test(url || "") ? url : "https://www.xiaohongshu.com/";
 
@@ -2085,6 +2434,7 @@ function vBench(){
     <div class="fold-b">
       <p>采集插件弹窗底部的「依次更新对标账号」可一次更新全部采集过的账号，也可设为每周提醒或自动运行。</p>
       <p><strong>风险</strong>：属于自动化访问，小红书可能判定账号行为异常，最坏情况是账号受限。默认关闭，开启前需确认。</p>
+      <p>在此处删除的账号，批量更新不再收录；插件批量更新页的账号列表可单独移除。在账号主页重新抓取即恢复。</p>
     </div>`;
   w.appendChild(batch);
 
@@ -2096,7 +2446,7 @@ function vBench(){
   const arows = el("div","rows");
   const topMedian = Math.max(...B.accounts.map(a=>a.median), 1);
   [...B.accounts].sort((a,b)=>b.median-a.median).forEach(a=>{
-    const r = el("div","row"); r.style.gridTemplateColumns = "1fr 240px 146px";
+    const r = el("div","row"); r.style.gridTemplateColumns = LOCAL ? "1fr 240px 200px" : "1fr 240px 146px";
     const m = el("div","r-main");
     const name = el("a","r-t r-link", esc(a.nickname));
     name.href = profileUrl(a.userId, a.url); name.target = "_blank"; name.rel = "noopener";
@@ -2105,12 +2455,14 @@ function vBench(){
     m.appendChild(el("span","r-p", esc(cut((a.desc||"").split("\n")[0], 54))));
     r.appendChild(m);
     r.appendChild(el("div","meta-cell",
-      `<span class="chip">粉丝 ${esc(a.fans)}</span><span>${a.noteCount} 条${
+      `<span class="chip">粉丝 ${esc(fansText(a.fans))}</span><span>${a.noteCount} 条${
         a.fetchedAt ? ` · ${a.fetchedAt.slice(5)} 采集` : ""}</span>`));
     const side = el("div","r-side");
     side.innerHTML = `<span class="minibar"><i style="width:${
       (a.median/topMedian*100).toFixed(1)}%;background:var(--purple)"></i></span>
       <span class="idle">中位 ${fmt(a.median)}</span>`;
+    if (LOCAL) side.appendChild(delBtn(() => deleteFiles("bench", [a.userId], `已删除「${a.nickname}」`),
+      { hover: true, title: `删除对标账号「${a.nickname}」` }));
     r.appendChild(side);
     arows.appendChild(r);
   });
@@ -2136,13 +2488,15 @@ function vBench(){
   const noteRow = (n, showAge, fresh) => {
     const r = el("div","row"); r.style.gridTemplateColumns = "1fr 196px 104px";
     const m = el("div","r-main");
-    if (fresh) m.appendChild(el("span","chip new-chip","新"));
     // 标题可点：跳小红书搜索，该条基本是首位结果，再用插件采集
-    const a = el("a","r-t r-link", esc(n.title));
+    const tl = el("div","r-t");
+    if (fresh) tl.appendChild(el("span","chip new-chip","新"));
+    const a = el("a","r-link inl", esc(n.title));
     a.href = "https://www.xiaohongshu.com/search_result?keyword="
              + encodeURIComponent(Array.from(n.title).slice(0,30).join(""));
     a.target = "_blank"; a.rel = "noopener";
-    m.appendChild(a);
+    tl.appendChild(a);
+    m.appendChild(tl);
     m.appendChild(el("span","r-p",
       `${n.userId ? `<a class="r-acc" href="${esc(profileUrl(n.userId))}" target="_blank" rel="noopener">${
         esc(n.account)}</a>` : esc(n.account)} · ${showAge ? (n.age === 0 ? "今天" : n.age + " 天前") : esc(n.date||"")}`));
@@ -2239,13 +2593,12 @@ function vBench(){
 function vInbox(){
   const w = document.createDocumentFragment();
   const list = DATA.inbox || [];
-  const done = Object.values(analyses);
+  const done = Object.values(analyses).filter(a => a.kind !== "选题推荐");
   const analyzed = analyzedIds();
   const pending = inboxPending();
 
   w.appendChild(head("采集箱",
-    `${list.length} 篇已采集，${pending} 篇待分析。选择 1 篇执行爆款拆解，
-     选择 2 篇以上执行结构共性分析；已分析过的仍可再次参与组合分析。`));
+    `${list.length} 篇已采集，${pending} 篇待分析。选择 1 篇执行爆款拆解，选择 2 篇以上执行结构共性分析。`));
 
   if (!list.length){
     const p = el("div","panel");
@@ -2265,9 +2618,9 @@ function vInbox(){
     return w;
   }
 
-  // 操作条
-  const bar = el("div","bar");
+  // 操作条：选中笔记后吸顶，长列表里滚动也能直接操作
   const n = picked.size;
+  const bar = el("div","bar" + (n ? " sticky" : ""));
   const go = el("button","tab" + (n && sample && !running ? " on" : ""));
   go.textContent = running ? "分析中"
                  : n === 0 ? "选择笔记后可分析"
@@ -2277,6 +2630,13 @@ function vInbox(){
   if (!go.disabled) go.onclick = runAnalysis;
   bar.appendChild(go);
   if (n){
+    if (LOCAL){
+      const ids = [...picked];
+      const del = el("button","tab", `删除（${n} 篇）`);
+      del.onclick = ()=> deleteFiles("inbox", ids, n === 1
+        ? `已删除「${cut((list.find(x => x.id === ids[0]) || {}).title || "", 20)}」` : `已删除 ${n} 篇笔记`);
+      bar.appendChild(del);
+    }
     const clr = el("button","tab","取消选择");
     clr.onclick = ()=>{ picked.clear(); renderView(); };
     bar.appendChild(clr);
@@ -2309,7 +2669,7 @@ function vInbox(){
   const rows = cappedRows("inbox-" + inboxFilter, shownList, nt=>{
     const on = picked.has(nt.id);
     const r = el("div","row selectable" + (on ? " flag":""));
-    r.style.gridTemplateColumns = "26px 1fr 190px 120px";
+    r.style.gridTemplateColumns = LOCAL ? "26px 1fr 190px 170px" : "26px 1fr 190px 120px";
     r.tabIndex = 0;
     r.setAttribute("role", "checkbox");
     r.setAttribute("aria-checked", String(on));
@@ -2322,8 +2682,15 @@ function vInbox(){
 
     const m = el("div","r-main");
     m.appendChild(el("div","r-t", esc(nt.title)));
-    m.appendChild(el("span","r-p",
-      esc(nt.author ? "@"+nt.author : "") + (nt.publishedAt ? " · "+nt.publishedAt : "")));
+    const sub = el("span","r-p",
+      esc(nt.author ? "@"+nt.author : "") + (nt.publishedAt ? " · "+nt.publishedAt : ""));
+    if (/^https:\/\/www\.xiaohongshu\.com\//.test(nt.url || "")){
+      const a = el("a","ext-a", "原笔记 ↗");
+      a.href = nt.url; a.target = "_blank"; a.rel = "noopener";
+      a.onclick = e => e.stopPropagation();
+      sub.append(" · "); sub.appendChild(a);
+    }
+    m.appendChild(sub);
     if (nt.tags.length)
       m.appendChild(el("span","r-perf", nt.tags.slice(0,5).map(t=>"#"+esc(t)).join(" ")));
     r.appendChild(m);
@@ -2341,6 +2708,8 @@ function vInbox(){
     const t = el("span", "stat-btn " + cls); t.style.cursor = "default";
     t.innerHTML = `<span class="dot"></span><span>${label}</span>`;
     side.appendChild(t);
+    if (LOCAL) side.appendChild(delBtn(() => deleteFiles("inbox", [nt.id], `已删除「${cut(nt.title, 20)}」`),
+      { hover: true, title: "删除这篇笔记" }));
     r.appendChild(side);
     return r;
   });
@@ -2372,7 +2741,10 @@ function vInbox(){
 
   if (done.length){
     const c = el("div","call info");
-    c.innerHTML = `<p>已完成 ${done.length} 份分析，结果在<strong>拆解报告</strong>中查看。</p>`;
+    c.innerHTML = `<p>已完成 ${done.length} 份分析，结果在拆解报告中。</p>`;
+    const go = el("button","tab","查看拆解报告");
+    go.onclick = ()=>{ current = "reports"; renderNav(); renderView(); window.scrollTo(0,0); };
+    c.appendChild(go);
     w.appendChild(c);
   }
   return w;
@@ -2408,8 +2780,11 @@ function vLibrary(){
 
   const bar = el("div","bar");
   const seg = el("div","seg");
-  ["全部","优先","降级","待验证"].forEach(f=>{
-    const b = el("button", f===libFilter?"on":"", f);
+  const TIER_OF = {"优先":"top", "降级":"down", "待验证":"untested", "人设组件":"persona"};
+  ["全部","优先","降级","待验证","人设组件"].forEach(f=>{
+    const c = f === "全部" ? all.length : all.filter(a => a.tier === TIER_OF[f]).length;
+    if (!c && f === "人设组件") return;
+    const b = el("button", f===libFilter?"on":"", `${f}<span class="segn">${c}</span>`);
     b.onclick = ()=>{ libFilter=f; renderView(); };
     seg.appendChild(b);
   });
@@ -2420,9 +2795,7 @@ function vLibrary(){
   let anyShown = false;
   A.categories.forEach(cat=>{
     let list = cat.assets.filter(a => matchQ("library", a.name, a.source, a.record));
-    if (libFilter==="优先")  list = list.filter(a=>a.tier==="top");
-    if (libFilter==="降级")  list = list.filter(a=>a.tier==="down");
-    if (libFilter==="待验证")   list = list.filter(a=>a.tier==="untested");
+    if (libFilter !== "全部") list = list.filter(a => a.tier === TIER_OF[libFilter]);
     if (!list.length) return;
     anyShown = true;
 
@@ -2431,15 +2804,24 @@ function vLibrary(){
       `<h2>${esc(cat.name)}</h2><span class="sub">${list.length} 条</span>`));
     const body = el("div","panel-b flush");
     const rows = cappedRows("lib-" + cat.name, list, a=>{
-      const r = el("div","row" + (a.tier==="top" ? " flag":""));
+      // 使用记录长的可点开看全文
+      const long = a.used && Array.from(a.record).length > 150;
+      const id = cat.name + "|" + a.name, open = long && openAssets.has(id);
+      const r = el("div","row" + (a.tier==="top" ? " flag":"") + (long ? " selectable" : ""));
       r.style.gridTemplateColumns = "1fr 96px";
+      if (long){
+        r.tabIndex = 0; r.setAttribute("aria-expanded", String(open));
+        const toggle = () => { open ? openAssets.delete(id) : openAssets.add(id); renderView(); };
+        r.onclick = toggle;
+        r.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); toggle(); } };
+      }
       const m = el("div","r-main");
       m.appendChild(el("div","r-t", esc(a.name)));
       m.appendChild(el("span","r-p", "来源 " + esc(a.source)));
-      const perf = el("span", a.used ? "r-perf" : "r-note",
-        a.used ? esc(cut(a.record,110)) : "未回流 · 暂无使用记录");
-      if (a.used) perf.title = a.record;
+      const perf = el("span", a.used ? "r-perf" + (open ? " rec-full" : long ? " clamp2" : "") : "r-note",
+        a.used ? esc(a.record) : "未回流 · 暂无使用记录");
       m.appendChild(perf);
+      if (long) m.appendChild(el("span","more-t", open ? "收起" : "展开全文"));
       r.appendChild(m);
       const side = el("div","r-side");
       const t = el("span", `stat-btn ${TIER_CLASS[a.tier]}`);
@@ -2467,7 +2849,9 @@ const VIEW_KEY = "workbench.view";
 function saveView(){
   try {
     sessionStorage.setItem(VIEW_KEY, JSON.stringify({ current, reportSel, reportKind, topicTab, topicSel, ownSel,
-      benchTab, inboxOpen, inboxFilter, wipFilter, libFilter, shown, queries, retroMsg, picked: [...picked], y: scrollY }));
+      benchTab, inboxOpen, inboxFilter, wipFilter, libFilter, shown, queries, retroMsg, pubSort, pubPlat,
+      toast: toast && Date.now() < toast.until ? toast : null, openAssets: [...openAssets],
+      picked: [...picked], y: scrollY }));
   } catch(e){ /* 存不了就回到总览，不影响使用 */ }
 }
 
@@ -2477,7 +2861,9 @@ function restoreView(){
     sessionStorage.removeItem(VIEW_KEY);
     if (!v) return 0;
     ({ current, reportSel, reportKind = "全部", topicTab, topicSel, ownSel, benchTab, inboxOpen,
-       inboxFilter = "全部", wipFilter, libFilter, retroMsg = null } = v);
+       inboxFilter = "全部", wipFilter, libFilter, retroMsg = null, pubSort = { k: "views", d: -1 },
+       pubPlat = "全部", toast = null } = v);
+    (v.openAssets || []).forEach(k => openAssets.add(k));
     Object.assign(shown, v.shown || {}); Object.assign(queries, v.queries || {});
     (v.picked || []).forEach(id => picked.add(id));
     return v.y || 0;
@@ -2511,6 +2897,7 @@ const restoredY = LOCAL ? restoreView() : 0;
 $("#genDate").textContent = `数据 ${DATA.generated}`;
 renderNav();
 renderView();
+paintToast();
 if (restoredY) scrollTo(0, restoredY);
 updateSync();
 
@@ -2535,11 +2922,18 @@ updateSync();
   }
   try {
     const snap = await db.collection("analyses").get();
+    const inDb = new Set();
     (snap.docs || []).forEach(doc => {
       const v = doc.data && doc.data();
       // 用文档 id 作 key：写入时就是按这个 id 存的，重算会对不上而产生重复
-      if (v && v.markdown && v.ids) analyses[doc.id] = v;
+      if (v && v.markdown && v.ids){ analyses[doc.id] = v; inDb.add(doc.id); }
     });
+    // 上次在数据库里见过、这次没有了：在别处删掉了。从没进过数据库的（只存在本机）保留
+    const queued = new Set(queuedOps.filter(o => o.kind === "set").map(o => o.path.replace(/^analyses\//, "")));
+    Object.keys(analyses).forEach(k => {
+      if (!inDb.has(k) && dbKeys.has(k) && !queued.has(k)) delete analyses[k];
+    });
+    dbKeys.clear(); inDb.forEach(k => dbKeys.add(k));
     saveLocal();
   } catch(e){ /* 历史分析读不到不影响状态，静默降级 */ }
   updateSync();
