@@ -2323,6 +2323,21 @@ function runningCard(){
 let benchTab = "近期爆款";
 
 /** 选题推荐：把对标近期爆款 + 你自己的选题报告结论一起交给 Claude 判断 */
+/** 选题推荐要的「这个账号自己的内容」：方向、最近发了什么、在做什么、验证过的写法 */
+function myContent(){
+  const T = DATA.topics || { categories: [] };
+  const recent = allPubs().filter(p => p.date).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 25);
+  const wip = items.filter(i => ["生产中", "待发布"].includes(effective(i)));
+  const top = ((DATA.assets || {}).categories || []).flatMap(c =>
+    c.assets.filter(a => a.tier === "top").map(a => `- ${c.name}：${a.name}`));
+  return {
+    myDirections: T.categories.map(c => `- ${c.name}（${c.n} 条）：${c.desc || ""}`).join("\n") || "（尚未划分）",
+    myRecent: recent.map(p => `- ${p.date} · ${p.platform} · ${p.cat || "未分类"} · ${cut(p.title.replace(/\s+/g, " "), 40)} · 播放 ${p.views} · 涨粉 ${p.fans}`).join("\n") || "（暂无）",
+    myWip: wip.map(i => `- ${i.title}`).join("\n") || "（无）",
+    myAssets: top.join("\n") || "（暂无）",
+  };
+}
+
 function promptTopics(B){
   const report = (DATA.topicReports || [])[0];
   return fill(DATA.prompts.topics, {
@@ -2330,6 +2345,7 @@ function promptTopics(B){
     accountPositioning: (DATA.account || {}).positioning || "（未填写）",
     accountBio: (DATA.account || {}).bio || "（未填写）",
     myReport: report ? report.body.slice(0, 4000) : "（暂无选题报告）",
+    ...myContent(),
     patternDays: B.patternDays ? `近 ${B.patternDays} 天` : "全部",
     today: new Date().toLocaleDateString("zh-CN", { year:"numeric", month:"long", day:"numeric" }),
     recentDays: B.recentDays || 90,
